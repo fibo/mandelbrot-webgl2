@@ -1,13 +1,28 @@
+<!doctype html>
 <html>
+  <head>
+    <title>WebGL2 Mandelbrot shader</title>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
-<head>
-<title>Learning WebGL &mdash; Mandelbrot shader example</title>
-<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script id="shader-vs" type="x-shader/x-vertex">#version 300 es
+  in vec2 aVertexPosition;
+  in vec2 aPlotPosition;
 
-<script id="shader-fs" type="x-shader/x-fragment">
+  out vec2 vPosition;
+
+  void main(void) {
+    gl_Position = vec4(aVertexPosition, 1.0, 1.0);
+    vPosition = aPlotPosition;
+  }
+</script>
+
+
+<script id="shader-fs" type="x-shader/x-fragment">#version 300 es
   precision mediump float;
 
-  varying vec2 vPosition;
+  in vec2 vPosition;
+
+  out vec4 outcolor;
 
   void main(void) {
     float cx = vPosition.x;
@@ -23,6 +38,7 @@
     float q;
     float t;
 
+    vec4 color;
 
     float x = 0.0;
     float y = 0.0;
@@ -51,36 +67,25 @@
       t = value * (1.0 - (1.0 - f) * saturation);
 
       if (hueIndex == 0)
-        gl_FragColor = vec4(value, t, p, 1.0);
+        color = vec4(value, t, p, 1.0);
       else if (hueIndex == 1)
-        gl_FragColor = vec4(q, value, p, 1.0);
+        color = vec4(q, value, p, 1.0);
       else if (hueIndex == 2)
-        gl_FragColor = vec4(p, value, t, 1.0);
+        color = vec4(p, value, t, 1.0);
       else if (hueIndex == 3)
-        gl_FragColor = vec4(p, q, value, 1.0);
+        color = vec4(p, q, value, 1.0);
       else if (hueIndex == 4)
-        gl_FragColor = vec4(t, p, value, 1.0);
+        color = vec4(t, p, value, 1.0);
       else if (hueIndex == 5)
-        gl_FragColor = vec4(value, p, q, 1.0);
+        color = vec4(value, p, q, 1.0);
 
     } else {
-      gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+      color = vec4(0.0, 0.0, 0.0, 1.0);
     }
+
+    outcolor = color;
   }
 </script>
-
-<script id="shader-vs" type="x-shader/x-vertex">
-  attribute vec2 aVertexPosition;
-  attribute vec2 aPlotPosition;
-
-  varying vec2 vPosition;
-
-  void main(void) {
-    gl_Position = vec4(aVertexPosition, 1.0, 1.0);
-    vPosition = aPlotPosition;
-  }
-</script>
-
 
 <script type="text/javascript">
 
