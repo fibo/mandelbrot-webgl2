@@ -18,9 +18,12 @@
 
 
 <script id="shader-fs" type="x-shader/x-fragment">#version 300 es
-  precision mediump float;
+  // precision mediump float;
+  precision highp float;
+  precision highp int;
 
   in vec2 vPosition;
+  uniform float u_zoom;
 
   out vec4 outcolor;
 
@@ -43,22 +46,25 @@
     float x = 0.0;
     float y = 0.0;
     float tempX = 0.0;
-    int i = 0;
     int runaway = 0;
 
-    for (int i = 0; i < 256; i++) {
+    int numInterations = max(int(log(u_zoom) + u_zoom), 200);
+
+    for (int i = 0; i < numInterations; i++) {
       tempX = x * x - y * y + float(cx);
       y = 2.0 * x * y + float(cy);
       x = tempX;
-      if (runaway == 0 && x * x + y * y > 100.0) {
+
+      if (x * x + y * y > 100.0) {
         runaway = i;
+        break;
       }
     }
 
     if (runaway != 0) {
-      hue = float(runaway) / 200.0;
+      hue = float(runaway) / float(2 * numInterations);
       saturation = 0.6;
-      value = 1.0;
+      value = 0.71;
 
       hueRound = hue * 6.0;
       hueIndex = int(mod(float(int(hueRound)), 6.0));
@@ -79,7 +85,6 @@
         color = vec4(t, p, value, 1.0);
       else if (hueIndex == 5)
         color = vec4(value, p, q, 1.0);
-
     } else {
       color = vec4(0.0, 0.0, 0.0, 1.0);
     }
@@ -90,19 +95,18 @@
 
 <script type="text/javascript">
   var gl
+
   function initGL(canvas) {
     try {
-      // gl = canvas.getContext("experimental-webgl");
       gl = canvas.getContext('webgl2')
-      gl.viewportWidth = canvas.width;
-      gl.viewportHeight = canvas.height;
-    } catch(e) {
-    }
+      gl.viewportWidth = canvas.width
+      gl.viewportHeight = canvas.height
+    } catch(e) {}
+
     if (!gl) {
       alert('Could not initialise WebGL2, sorry :-(')
     }
   }
-
 
   function getShader(gl, id) {
     var shaderScript = document.getElementById(id);
@@ -139,11 +143,10 @@
     return shader;
   }
 
-
   var shaderProgram;
   var aVertexPosition;
-  function initShaders() {
 
+  function initShaders() {
     var fragmentShader = getShader(gl, "shader-fs");
     var vertexShader = getShader(gl, "shader-vs");
 
@@ -174,6 +177,7 @@
   var zoomCenterY;
 
   var vertexPositionBuffer;
+
   function initBuffers() {
     vertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
@@ -181,14 +185,12 @@
          1.0,  1.0,
         -1.0,  1.0,
          1.0, -1.0,
-        -1.0, -1.0,
+        -1.0, -1.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     vertexPositionBuffer.itemSize = 2;
     vertexPositionBuffer.numItems = 4;
   }
-
-
 
   var baseCorners = [
       [ 0.7,  1.2],
@@ -203,7 +205,6 @@
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
     gl.vertexAttribPointer(aVertexPosition, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
 
     var plotPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, plotPositionBuffer);
@@ -223,7 +224,15 @@
 
     gl.deleteBuffer(plotPositionBuffer)
 
-    zoom *= 1.002
+      if (zoom < 5000) {
+        zoom *= 1.01
+      } else {
+        resetZoom()
+      }
+
+    // Pass the zoom to the shader.
+    var zoomLoc = gl.getUniformLocation(shaderProgram, 'u_zoom')
+    gl.uniform1f(zoomLoc, zoom)
 
     document.getElementById("zoomOutput").value = zoom;
 
@@ -239,13 +248,11 @@
 
   }
 
-
   function resetZoom() {
     zoom = 1.0;
     zoomCenterX = parseFloat(document.getElementById("zoomCenterXInput").value);
     zoomCenterY = parseFloat(document.getElementById("zoomCenterYInput").value);
   }
-
 
       function loop () {
         drawScene()
@@ -271,14 +278,18 @@
     </style>
   </head>
   <body onload="webGL2Start()">
-    <canvas id="fractal-view" width="425" height="330"></canvas>
+    <canvas id="fractal-view" width="400" height="300"></canvas>
 
   <h2>Inputs</h2>
   <form name="inputs">
   <p>
   Zoom target: <br />
-  X <input type="text" id="zoomCenterXInput" value="0.28693186889504513" />
-  Y <input type="text" id="zoomCenterYInput" value="0.014286693904085048" />
+  <!--
+  X <input type="text" id="zoomCenterXInput" value="0.28591" />
+  Y <input type="text" id="zoomCenterYInput" value="0.012" />
+  -->
+  X <input type="text" id="zoomCenterXInput" value="-1.7678887777771111" />
+  Y <input type="text" id="zoomCenterYInput" value="0.004011" />
 
   <p>
   <input type="button" value="Reset Zoom" onClick="resetZoom()" />
