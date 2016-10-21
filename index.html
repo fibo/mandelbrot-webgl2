@@ -45,7 +45,8 @@
     float tempX = 0.0;
     int i = 0;
     int runaway = 0;
-    for (int i=0; i < 100; i++) {
+
+    for (int i = 0; i < 256; i++) {
       tempX = x * x - y * y + float(cx);
       y = 2.0 * x * y + float(cy);
       x = tempX;
@@ -88,8 +89,7 @@
 </script>
 
 <script type="text/javascript">
-
-  var gl;
+  var gl
   function initGL(canvas) {
     try {
       // gl = canvas.getContext("experimental-webgl");
@@ -99,7 +99,7 @@
     } catch(e) {
     }
     if (!gl) {
-      alert("Could not initialise WebGL, sorry :-(");
+      alert('Could not initialise WebGL2, sorry :-(')
     }
   }
 
@@ -196,6 +196,7 @@
       [ 0.7, -1.2],
       [-2.2, -1.2],
   ];
+
   function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -222,8 +223,10 @@
 
     gl.deleteBuffer(plotPositionBuffer)
 
-    zoom *= 1.02;
+    zoom *= 1.002
+
     document.getElementById("zoomOutput").value = zoom;
+
     if (centerOffsetX != zoomCenterX) {
       centerOffsetX += (zoomCenterX - centerOffsetX) / 20;
     }
@@ -244,31 +247,31 @@
   }
 
 
-  function webGLStart() {
-    resetZoom();
+      function loop () {
+        drawScene()
+        requestAnimationFrame(loop)
+      }
 
-    var canvas = document.getElementById("example01-canvas");
-    initGL(canvas);
-    initShaders()
-    initBuffers();
+      function webGL2Start() {
+        var canvas = document.getElementById('fractal-view')
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        resetZoom()
+        initGL(canvas)
+        initShaders()
+        initBuffers()
 
-    setInterval(drawScene, 15);
-  }
+        gl.clearColor(0.0, 0.0, 0.0, 1.0)
 
+        loop()
+      }
+    </script>
 
-
-</script>
-
-
-</head>
-
-
-<body onload="webGLStart();">
-  <a href="http://learningwebgl.com/blog/?p=205">&lt;&lt; Back to the blog</a><br />
-
-  <canvas id="example01-canvas" style="border: none;" width="425" height="330"></canvas>
+    <style>
+      canvas { border: none; }
+    </style>
+  </head>
+  <body onload="webGL2Start()">
+    <canvas id="fractal-view" width="425" height="330"></canvas>
 
   <h2>Inputs</h2>
   <form name="inputs">
@@ -290,9 +293,5 @@
   <p>
   Zoom: <input type="text" id="zoomOutput" />
   </form>
-
-  <br/>
-  <a href="http://learningwebgl.com/blog/?p=205">&lt;&lt; Back to the blog</a><br />
-</body>
-
+  </body>
 </html>
