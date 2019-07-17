@@ -98,13 +98,15 @@
 
   function initGL(canvas) {
     try {
-      gl = canvas.getContext('webgl2')
-      gl.viewportWidth = canvas.width
-      gl.viewportHeight = canvas.height
-    } catch(e) {}
+      gl = canvas.getContext('webgl2');
+      gl.viewportWidth = canvas.width;
+      gl.viewportHeight = canvas.height;
+    } catch(error) {
+      console.error(error);
+    }
 
     if (!gl) {
-      alert('Could not initialise WebGL2, sorry :-(')
+      alert('Could not initialise WebGL2, sorry :-(');
     }
   }
 
@@ -114,7 +116,7 @@
       return null;
     }
 
-    var str = "";
+    var str = '';
     var k = shaderScript.firstChild;
     while (k) {
       if (k.nodeType == 3) {
@@ -124,9 +126,9 @@
     }
 
     var shader;
-    if (shaderScript.type == "x-shader/x-fragment") {
+    if (shaderScript.type == 'x-shader/x-fragment') {
       shader = gl.createShader(gl.FRAGMENT_SHADER);
-    } else if (shaderScript.type == "x-shader/x-vertex") {
+    } else if (shaderScript.type == 'x-shader/x-vertex') {
       shader = gl.createShader(gl.VERTEX_SHADER);
     } else {
       return null;
@@ -147,8 +149,8 @@
   var aVertexPosition;
 
   function initShaders() {
-    var fragmentShader = getShader(gl, "shader-fs");
-    var vertexShader = getShader(gl, "shader-vs");
+    var fragmentShader = getShader(gl, 'shader-fs');
+    var vertexShader = getShader(gl, 'shader-vs');
 
     shaderProgram = gl.createProgram();
     gl.attachShader(shaderProgram, vertexShader);
@@ -156,15 +158,15 @@
     gl.linkProgram(shaderProgram);
 
     if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-      alert("Could not initialise shaders");
+      alert('Could not initialise shaders');
     }
 
     gl.useProgram(shaderProgram);
 
-    aVertexPosition = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    aVertexPosition = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
     gl.enableVertexAttribArray(aVertexPosition);
 
-    aPlotPosition = gl.getAttribLocation(shaderProgram, "aPlotPosition");
+    aPlotPosition = gl.getAttribLocation(shaderProgram, 'aPlotPosition');
     gl.enableVertexAttribArray(aPlotPosition);
   }
 
@@ -231,21 +233,20 @@
       }
 
     // Pass the zoom to the shader.
-    var zoomLoc = gl.getUniformLocation(shaderProgram, 'u_zoom')
-    gl.uniform1f(zoomLoc, zoom)
+    var zoomLoc = gl.getUniformLocation(shaderProgram, 'u_zoom');
+    gl.uniform1f(zoomLoc, zoom);
 
-    document.getElementById("zoomOutput").value = zoom;
+    // document.getElementById("zoomOutput").value = zoom;
 
     if (centerOffsetX != zoomCenterX) {
       centerOffsetX += (zoomCenterX - centerOffsetX) / 20;
     }
-    document.getElementById("centerOffsetXOutput").value = centerOffsetX;
+    // document.getElementById("centerOffsetXOutput").value = centerOffsetX;
 
     if (centerOffsetY != zoomCenterY) {
       centerOffsetY += (zoomCenterY - centerOffsetY) / 20;
     }
-    document.getElementById("centerOffsetYOutput").value = centerOffsetY;
-
+    // document.getElementById("centerOffsetYOutput").value = centerOffsetY;
   }
 
   function resetZoom() {
@@ -255,21 +256,21 @@
   }
 
       function loop () {
-        drawScene()
-        requestAnimationFrame(loop)
+        drawScene();
+        requestAnimationFrame(loop);
       }
 
       function webGL2Start() {
-        var canvas = document.getElementById('fractal-view')
+        var canvas = document.getElementById('fractal-view');
 
-        resetZoom()
-        initGL(canvas)
-        initShaders()
-        initBuffers()
+        resetZoom();
+        initGL(canvas);
+        initShaders();
+        initBuffers();
 
-        gl.clearColor(0.0, 0.0, 0.0, 1.0)
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-        loop()
+        loop();
       }
     </script>
 
@@ -277,32 +278,33 @@
       canvas { border: none; }
     </style>
   </head>
+
   <body onload="webGL2Start()">
     <canvas id="fractal-view" width="400" height="300"></canvas>
 
-  <h2>Inputs</h2>
-  <form name="inputs">
-  <p>
-  Zoom target: <br />
-  <!--
-  X <input type="text" id="zoomCenterXInput" value="0.28591" />
-  Y <input type="text" id="zoomCenterYInput" value="0.012" />
-  -->
-  X <input type="text" id="zoomCenterXInput" value="-1.7678887777771111" />
-  Y <input type="text" id="zoomCenterYInput" value="0.004011" />
+    <h2>Inputs</h2>
 
-  <p>
-  <input type="button" value="Reset Zoom" onClick="resetZoom()" />
-  </form>
+    <form name="inputs">
+      <p>
+        Zoom target: <br />
+        X <input type="text" id="zoomCenterXInput" value="-1.7678887777771111" />
+        Y <input type="text" id="zoomCenterYInput" value="0.004011" />
 
-  <h2>Current state (read-only)</h2>
-  <form name="outputs">
-  <p>
-  Current center: <br />
-  X <input type="text" id="centerOffsetXOutput" /> Y <input type="text" id="centerOffsetYOutput" />
+      </p>
 
-  <p>
-  Zoom: <input type="text" id="zoomOutput" />
-  </form>
+      <input type="button" value="Reset Zoom" onClick="resetZoom()" />
+    </form>
+
+    <!--h2>Current state (read-only)</h2>
+
+    <form name="outputs">
+      <p>
+        Current center: <br />
+        X <input type="text" id="centerOffsetXOutput" /> Y <input type="text" id="centerOffsetYOutput" />
+
+      </p>
+
+      Zoom: <input type="text" id="zoomOutput" />
+    </form-->
   </body>
 </html>
